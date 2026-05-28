@@ -9,7 +9,7 @@ import type { DiscussionConfig, Model } from './types.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
-const DEFAULT_PORT = 3001;
+const DEFAULT_PORT = 26529;
 const PORT = readPort(process.env.PORT || process.env.BACKEND_PORT, DEFAULT_PORT);
 
 interface DiscussionStartRequest extends DiscussionConfig {

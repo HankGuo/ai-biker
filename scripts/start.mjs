@@ -8,19 +8,37 @@ const devMode = process.argv.includes('--dev');
 const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const root = process.cwd();
 
-const requestedBackendPort = readPort(process.env.BACKEND_PORT || process.env.PORT, 3001);
-const requestedFrontendPort = readPort(process.env.FRONTEND_PORT, 5173);
+const FRONTEND_DEFAULT_PORT = 26528;
+const BACKEND_DEFAULT_PORT = 26529;
 
-const backendPort = await findFreePort(requestedBackendPort);
-const frontendPort = await findFreePort(requestedFrontendPort);
+const requestedBackendPort = readPort(process.env.BACKEND_PORT || process.env.PORT, BACKEND_DEFAULT_PORT);
+const requestedFrontendPort = readPort(process.env.FRONTEND_PORT, FRONTEND_DEFAULT_PORT);
 
-if (backendPort !== requestedBackendPort) {
-  console.log(`后端端口 ${requestedBackendPort} 已被占用，改用 ${backendPort}`);
+const backendFree = await isFree(requestedBackendPort);
+const frontendFree = await isFree(requestedFrontendPort);
+
+let hasError = false;
+
+if (!backendFree) {
+  console.error(`\n错误: 后端端口 ${requestedBackendPort} 已被占用。`);
+  console.error('请关闭占用该端口的进程，或设置环境变量 BACKEND_PORT 指定其他端口。');
+  console.error(`示例: BACKEND_PORT=26539 npm run start\n`);
+  hasError = true;
 }
 
-if (frontendPort !== requestedFrontendPort) {
-  console.log(`前端端口 ${requestedFrontendPort} 已被占用，改用 ${frontendPort}`);
+if (!frontendFree) {
+  console.error(`\n错误: 前端端口 ${requestedFrontendPort} 已被占用。`);
+  console.error('请关闭占用该端口的进程，或设置环境变量 FRONTEND_PORT 指定其他端口。');
+  console.error(`示例: FRONTEND_PORT=26538 npm run start\n`);
+  hasError = true;
 }
+
+if (hasError) {
+  process.exit(1);
+}
+
+const backendPort = requestedBackendPort;
+const frontendPort = requestedFrontendPort;
 
 console.log(`后端: http://localhost:${backendPort}`);
 console.log(`前端: http://localhost:${frontendPort}`);
@@ -68,13 +86,6 @@ function readPort(value, fallback) {
   if (!value) return fallback;
   const port = Number(value);
   return Number.isInteger(port) && port > 0 && port < 65536 ? port : fallback;
-}
-
-async function findFreePort(startPort) {
-  for (let port = startPort; port < startPort + 100; port += 1) {
-    if (await isFree(port)) return port;
-  }
-  throw new Error(`未找到可用端口: ${startPort}-${startPort + 99}`);
 }
 
 function isFree(port) {

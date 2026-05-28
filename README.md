@@ -17,7 +17,7 @@
 
 ## 安全与数据存储
 
-本项目现在默认采用“浏览器本地保存配置，后端无状态执行”的模式：
+本项目默认采用"浏览器本地保存配置，后端无状态执行"的模式：
 
 - 项目不内置任何模型地址、模型名称或 API Key。
 - 模型配置只保存在你自己浏览器的 `localStorage` 中，key 为 `ai-bicker.models.v1`。
@@ -54,23 +54,58 @@ npm install
 npm run start
 ```
 
-启动器会自动检查端口：
+### 停止服务
 
-- 后端默认从 `3001` 开始找可用端口。
-- 前端默认从 `5173` 开始找可用端口。
-- 如果端口被占用，会自动改用下一个可用端口。
-- 终端会打印实际前端地址，例如 `http://localhost:5173` 或 `http://localhost:5174`。
+#### macOS / Linux
+
+```bash
+chmod +x stop.sh
+./stop.sh
+```
+
+#### Windows
+
+双击 `stop.bat`，或在项目目录运行：
+
+```bat
+stop.bat
+```
+
+#### 通用方式
+
+```bash
+npm run stop
+```
+
+## 端口说明
+
+- **前端固定端口：`26528`**
+- **后端固定端口：`26529`**
+
+启动器不会自动跳端口。如果任一端口被占用，启动时会打印友好提示并退出，例如：
+
+```
+错误: 前端端口 26528 已被占用。
+请关闭占用该端口的进程，或设置环境变量 FRONTEND_PORT 指定其他端口。
+示例: FRONTEND_PORT=26538 npm run start
+```
+
+如需临时指定其他端口，可设置环境变量：
+
+```bash
+FRONTEND_PORT=26538 BACKEND_PORT=26539 npm run start
+```
 
 ## 使用方式
 
-1. 打开终端里显示的前端地址。
-2. 在“嘉宾与主持”里添加至少 2 个模型。
+1. 打开终端里显示的前端地址（默认 `http://localhost:26528`）。
+2. 在"嘉宾与主持"里添加至少 2 个模型。
 3. 每个模型需要填写：
    - API 地址，例如 OpenAI-compatible `/v1/chat/completions` 地址
    - 模型名称
    - API Key
-4. 选择一位模型作为“兼任主持人”。
-5. 输入讨论主题，点击“开麦！”。
+4. 选择一位模型作为"兼任主持人"。
+5. 输入讨论主题，点击"开麦！"。
 
 ## 配置文件
 
@@ -103,19 +138,31 @@ ai-biker/
 │   │   ├── context/
 │   │   └── types.ts
 │   └── package.json
-├── scripts/start.mjs     # 跨平台启动器，自动避开端口冲突
+├── scripts/
+│   ├── start.mjs         # 跨平台启动器
+│   └── stop.mjs          # 跨平台停止器
 ├── config.json           # 仅默认话题/轮次，无敏感信息
 ├── start.sh              # macOS/Linux 一键启动
 ├── start.bat             # Windows 一键启动
+├── stop.sh               # macOS/Linux 一键停止
+├── stop.bat              # Windows 一键停止
 └── package.json
 ```
 
 ## 开发命令
 
 ```bash
-npm run dev
-npm run build
-cd backend && npm run build
+npm run dev          # 开发模式启动前后端
+npm run start        # 生产模式启动前后端
+npm run stop         # 停止前后端服务
+npm run build        # 构建前端
+```
+
+单独启动/停止：
+
+```bash
+cd backend && npm run dev    # 单独启动后端开发模式
+cd frontend && npm run dev   # 单独启动前端开发模式
 ```
 
 ## 许可证
